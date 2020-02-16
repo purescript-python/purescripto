@@ -14,7 +14,7 @@ setup(
     long_description=readme,
     long_description_content_type="text/markdown",
     license='mit',
-    python_requires='>=3.6.0',
+    python_requires='>=3.5',
     url='https://github.com/thautawarm/purescripto',
     author='thautawarm',
     author_email='twshere@outlook.com',
