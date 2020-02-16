@@ -11,7 +11,7 @@ _pspy_hs_command = "pspy-one-module"
 def cli(run: bool = False, version: bool = False):
     """PureScript Python compiler"""
     path = Path().absolute()
-    _python_pack_name = path.parent
+    _python_pack_name = path.name.replace('-', '_')
     corefn_dir = path / "output"
     pure_py_conf = path / "pure-py.json"
     if not pure_py_conf.exists():
