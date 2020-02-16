@@ -4,6 +4,7 @@ from typing import Dict
 from subprocess import check_call
 import glob
 import json
+import sys
 
 _pspy_hs_command = "pspy-one-module"
 
@@ -30,6 +31,7 @@ def cli(run: bool = False, version: bool = False):
             foreign_path = Path(foreign_path)
 
     if run:
+        sys.path.append(str(path))
         import_module('{}.Main.purescript_impl'.format(python_pack_name))
         return
     elif version:
