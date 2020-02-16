@@ -8,9 +8,9 @@ import json
 _pspy_hs_command = "pspy-one-module"
 
 
-def cli(path: str, run: bool = False, version: bool = False):
+def cli(run: bool = False, version: bool = False):
     """PureScript Python compiler"""
-    path = Path(path).absolute()
+    path = Path().absolute()
     _python_pack_name = path.parent
     corefn_dir = path / "output"
     pure_py_conf = path / "pure-py.json"
