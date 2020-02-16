@@ -1,0 +1,1 @@
+from purescripto.purescript_loader import LoadPureScript
