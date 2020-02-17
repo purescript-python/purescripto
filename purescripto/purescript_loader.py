@@ -10,10 +10,15 @@ import marshal
 RES = 'res'
 """generated code object is stored in global variable $RES"""
 
+
+def _import_module_to_dict(m: str):
+    return import_module(m).__dict__
+
+
 RTS_TEMPLATE = {
     'zfsr64': rts.zfsr64,
     'Error': rts.Error,
-    'import_module': import_module
+    'import_module': _import_module_to_dict
 }
 
 
