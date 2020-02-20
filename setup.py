@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 from datetime import datetime
 from pathlib import Path
 
-version = 0.2
+version = 0.3
 with Path('README.md').open() as readme:
     readme = readme.read()
 
@@ -26,8 +26,7 @@ setup(
         'painless-import-extension',
         'pysexpr',
         'wisepy2',
-        'gitpython',
-        'diskcache'
+        'gitpython'
     ],  # dependencies
     platforms="any",
     classifiers=[
