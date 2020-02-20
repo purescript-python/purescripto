@@ -81,7 +81,7 @@ def solve_ffi(conf: CValue) -> Iterable[str]:
             yield solve_github_repo(package_name, version)
 
 
-def build(run: bool = False, version: bool = False, init=False):
+def build(run: bool = False, version: bool = False, init: bool = False):
     """PureScript Python compiler"""
     path = Path().absolute()
     pure_py_conf = path / "pure-py.json"

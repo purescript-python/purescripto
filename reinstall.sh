@@ -1,1 +1,1 @@
-pip uninstall purescripto && devp clean && python setup.py install
+pip uninstall purescripto -y && devp clean && python setup.py install
