@@ -4,7 +4,6 @@ class CKey:
     BluePrint = 'pspy-blueprint'
     PyPack = 'python-package'
     CoreFnDir = 'corefn-dir'
-    PyCurFFI = 'ffi-current-project'
     EntryModule = 'entry-module'
 
 
@@ -14,7 +13,6 @@ class CValue:
     BluePrint = 'pspy-blueprint'
     PyPack = "python"
     CoreFnDir = 'output'
-    PyCurFFI = 'python-ffi'
     EntryModule = 'Main'
 
 

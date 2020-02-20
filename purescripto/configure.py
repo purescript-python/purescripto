@@ -90,7 +90,6 @@ def build(run: bool = False, version: bool = False):
     conf_dict.setdefault(CKey.CoreFnDir, CValue.CoreFnDir)
     conf_dict.setdefault(CKey.Spago, CValue.Spago)
     conf_dict.setdefault(CKey.EntryModule, CValue.EntryModule)
-    conf_dict.setdefault(CKey.PyCurFFI, CValue.PyCurFFI)
 
     conf = CValue()
     conf.IndexMirror = conf_dict[CKey.IndexMirror]
@@ -99,7 +98,6 @@ def build(run: bool = False, version: bool = False):
     conf.CoreFnDir = conf_dict[CKey.CoreFnDir]
     conf.Spago = conf_dict[CKey.Spago]
     conf.EntryModule = conf_dict[CKey.EntryModule]
-    conf.PyCurFFI = conf_dict[CKey.PyCurFFI]
 
     # TODO: currently unused.
     #   support custom corefn output path in pspy-blueprint.
@@ -133,7 +131,11 @@ def build(run: bool = False, version: bool = False):
 
     # copy python ffi files
     for repo_path in solve_ffi(conf):
-        copy_tree(path_join(repo_path, 'python'), python_ffi_path)
+        copy_tree(path_join(repo_path, 'python-ffi'), python_ffi_path)
+
+    python_ffi_provided_by_current_proj = path / "python-ffi"
+    if python_ffi_provided_by_current_proj.exists():
+        copy_tree(str(python_ffi_provided_by_current_proj), python_ffi_path)
 
     # fill __init__.py
     for dir, _, files in os.walk(conf.PyPack):
