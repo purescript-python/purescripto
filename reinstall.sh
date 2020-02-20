@@ -1,0 +1,1 @@
+pip uninstall purescripto && devp clean && python setup.py install
