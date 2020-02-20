@@ -25,7 +25,6 @@ import os
 _TEMPLATE = {
     CKey.CoreFnDir: CValue.CoreFnDir,
     CKey.EntryModule: CValue.EntryModule,
-    CKey.PyPack: CValue.PyPack,
     CKey.BluePrint: CValue.BluePrint,
     CKey.Spago: CValue.Spago,
     CKey.IndexMirror: CValue.IndexMirror
@@ -87,18 +86,21 @@ def build(run: bool = False, version: bool = False, init: bool = False):
         if not pure_py_conf.exists():
             with pure_py_conf.open('w') as f:
                 json.dump(_TEMPLATE, f, indent=2, sort_keys=True)
-            with (path / '.gitignore').open('a+') as f:
-                is_configured = {'.pure-py/': False, '.pure-py.json': False}
+
+            ignore_file = path / ".gitignore"
+            with ignore_file.open('a+') as f:
+                is_configured = {'.pure-py/': True, 'pure-py.json': True}
                 for each in f.readlines():
-                    if each in ('.pure-py/', '.pure-py.json'):
-                        is_configured[each] = True
+                    if each in ('.pure-py/', 'pure-py.json'):
+                        is_configured[each] = False
 
                 xs = [k for k, v in is_configured.items() if v]
                 if xs:
-                    xs.reverse()
-                    xs.append('# purescript-python')
-                    xs.reverse()
-                    f.writelines(xs)
+                    f.write('\n# purescript-python\n')
+                    for x in xs:
+                        f.write(x)
+                        f.write('\n')
+
             local_dir = (path / STR_PY_PSC_LOCAL_PATH)
             local_dir.mkdir(parents=True, exist_ok=True)
             (local_dir / STR_FFI_DEPS_FILENAME).open('w').close()

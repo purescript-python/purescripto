@@ -20,7 +20,7 @@ class CValue:
 
 
 STR_PSPY_BLUEPRINT_CMD = "pspy-blueprint"
-STR_PY_PSC_LOCAL_PATH = '.py-pure'
+STR_PY_PSC_LOCAL_PATH = '.pure-py'
 STR_FFI_DEPS_FILENAME = 'ffi-deps'
 
 PSPY_HOME = Path("~/.pspy").expanduser()

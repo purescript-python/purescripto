@@ -17,7 +17,7 @@ def auto_link_repo(git_url: str, update=False) -> git.Repo:
 
     if not repo_path.exists():
         repo = git.Repo.clone_from(git_url, str(repo_path))
-    elif not (repo_path / "git").exists():
+    elif not (repo_path / ".git").exists():
         remove_tree(str(repo_path))
         repo = git.Repo.clone_from(git_url, str(repo_path))
     else:
