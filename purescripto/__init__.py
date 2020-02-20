@@ -1,1 +1,2 @@
 from purescripto.purescript_loader import LoadPureScript
+from purescripto.ffi_utilities import auto_link_repo

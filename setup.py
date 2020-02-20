@@ -15,7 +15,7 @@ setup(
     long_description_content_type="text/markdown",
     license='mit',
     python_requires='>=3.5',
-    url='https://github.com/thautawarm/purescripto',
+    url='https://github.com/purescript-python/purescripto',
     author='thautawarm',
     author_email='twshere@outlook.com',
     packages=find_packages(),
@@ -23,17 +23,14 @@ setup(
     # above option specifies what commands to install,
     # e.g: entry_points={"console_scripts": ["yapypy=yapypy.cmd:compiler"]}
     install_requires=[
-        'painless-import-extension',
-        'pysexpr',
-        'wisepy2',
-        'gitpython',
-        'diskcache'
+        'painless-import-extension', 'pysexpr', 'wisepy2', 'gitpython'
     ],  # dependencies
     platforms="any",
     classifiers=[
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: Implementation :: CPython",
     ],
     zip_safe=False,

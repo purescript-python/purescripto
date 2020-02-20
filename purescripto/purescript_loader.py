@@ -16,8 +16,8 @@ def _import_module_to_dict(m: str):
 
 
 RTS_TEMPLATE = {
-    'zfsr64': rts.zfsr64,
-    'Error': rts.Error,
+    'zfsr32': rts.zfsr32,
+    'Error': Exception,
     'import_module': _import_module_to_dict
 }
 

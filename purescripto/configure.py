@@ -10,6 +10,7 @@ The configuration file .pure-py.json has following keys, whose values are all st
 
 You'd better add following paths to .gitignore :
 - .pure-py.json
+- .pure-py/
 """
 from pathlib import Path
 from importlib import import_module
@@ -17,6 +18,7 @@ from typing import Dict, List, Iterable
 from subprocess import check_call
 from importlib.util import spec_from_file_location, module_from_spec
 from distutils.dir_util import copy_tree
+from purescripto.configure_consts import *
 import json
 import sys
 import os
@@ -33,34 +35,6 @@ def mk_ps_blueprint_cmd(pspy_blueprint, python_pack_name: str, entry: str,
         '--out-ffi-dep',
         ffi_deps_path,
     ]
-
-
-class CKey:
-    IndexMirror = 'index-mirror'
-    Spago = 'spago'
-    BluePrint = 'pspy-blueprint'
-    PyPack = 'python-package'
-    CoreFnDir = 'corefn-dir'
-    PyCurFFI = 'ffi-current-project'
-    EntryModule = 'entry-module'
-
-
-class CValue:
-    IndexMirror = 'default'
-    Spago = 'spago'
-    BluePrint = 'pspy-blueprint'
-    PyPack = "python"
-    CoreFnDir = 'output'
-    PyCurFFI = 'python-ffi'
-    EntryModule = 'Main'
-
-
-PSPY_BLUEPRINT_CMD = "pspy-blueprint"
-FFI_LOCAL_MODULE_PATH = "ffi"
-PY_PSC_LOCAL_PATH = '.py-pure'
-_local_cache = '.py_cache'
-PSPY_HOME = "~/.pspy"
-FFI_DEPS_FILENAME = 'ffi-deps'
 
 
 def import_from_path(name, path):
@@ -134,7 +108,7 @@ def build(run: bool = False, version: bool = False):
     # run commands
     if run:
         sys.path.append(str(path))
-        import_module('{}.Main.pure'.format(conf.PyPack))
+        import_module('{}.{}.pure'.format(conf.PyPack, conf.EntryModule))
         return
     elif version:
         from purescripto.version import __version__
