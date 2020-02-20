@@ -26,6 +26,8 @@ setup(
         'painless-import-extension',
         'pysexpr',
         'wisepy2',
+        'gitpython',
+        'diskcache'
     ],  # dependencies
     platforms="any",
     classifiers=[

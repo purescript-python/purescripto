@@ -1,94 +1,167 @@
+"""
+The configuration file .pure-py.json has following keys, whose values are all strings.
+- spago: the path of spago command, default: "spago".
+- index-mirror: the name of python FFI mirror used, default: "default".
+- blueprint: the path of `pspy-blueprint`, default: `pspy-blueprint`
+- python-package: the name of output python package,
+                  default to be the name of current directory,
+                  with dashs replaced by underscores.
+- corefn-dir: the name of corefn directory, default to be "output"
+
+You'd better add following paths to .gitignore :
+- .pure-py.json
+"""
 from pathlib import Path
 from importlib import import_module
-from typing import Dict, Optional, List, Tuple
-from subprocess import check_call, check_output
-import glob
+from typing import Dict, List, Iterable
+from subprocess import check_call
+from importlib.util import spec_from_file_location, module_from_spec
+from distutils.dir_util import copy_tree
 import json
 import sys
-
-_pspy_hs_command = "pspy-one-module"
-_pspy_local_dir = ".pspy"
+import os
 
 
-def list_ffi_requirements(
-        conf: Optional[dict]) -> List[Tuple[str, List[int], List[str]]]:
-    """:return: [(PackageName, VersionParts, QualifiedModuleNames)]
-    """
-    if conf:
-        spago_cmd = conf.get("spago", 'spago')
-    else:
-        spago_cmd = "spago"
+def mk_ps_blueprint_cmd(pspy_blueprint, python_pack_name: str, entry: str,
+                        ffi_deps_path: str):
+    return [
+        pspy_blueprint,
+        '--out-python',
+        python_pack_name,
+        '--corefn-entry',
+        entry,
+        '--out-ffi-dep',
+        ffi_deps_path,
+    ]
 
-    xs = check_output([spago_cmd, 'sources'])
-    if not xs:
-        raise IOError("spago command failed")
-    package_paths = xs.decode().splitlines()
 
-    packages_requiring_ffi = []
+class CKey:
+    IndexMirror = 'index-mirror'
+    Spago = 'spago'
+    BluePrint = 'pspy-blueprint'
+    PyPack = 'python-package'
+    CoreFnDir = 'corefn-dir'
+    PyCurFFI = 'ffi-current-project'
+    EntryModule = 'entry-module'
 
-    for package_path in package_paths:
-        package_path = Path(package_path)
 
-        parts = package_path.parts
+class CValue:
+    IndexMirror = 'default'
+    Spago = 'spago'
+    BluePrint = 'pspy-blueprint'
+    PyPack = "python"
+    CoreFnDir = 'output'
+    PyCurFFI = 'python-ffi'
+    EntryModule = 'Main'
+
+
+PSPY_BLUEPRINT_CMD = "pspy-blueprint"
+FFI_LOCAL_MODULE_PATH = "ffi"
+PY_PSC_LOCAL_PATH = '.py-pure'
+_local_cache = '.py_cache'
+PSPY_HOME = "~/.pspy"
+FFI_DEPS_FILENAME = 'ffi-deps'
+
+
+def import_from_path(name, path):
+    spec = spec_from_file_location(name, path)
+    mod = module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def solve_ffi(conf: CValue) -> Iterable[str]:
+    mirror_name = conf.IndexMirror
+    pspy_home = Path(PSPY_HOME).expanduser()
+    mirror_entry = pspy_home / "mirrors" / mirror_name / "entry.py"
+    if not mirror_entry.exists():
+        raise IOError("Mirror {} not found in {}".format(
+            mirror_name, mirror_entry.parent))
+
+    mirror_mod = import_from_path(mirror_name, str(mirror_entry))
+    solve_github_repo = mirror_mod.solve
+
+    pspy_local_path = Path(PY_PSC_LOCAL_PATH)
+    ffi_deps = pspy_local_path / FFI_DEPS_FILENAME
+    with ffi_deps.open() as f:
+        deps = f.read().splitlines()
+
+    for dep in deps:
+        parts = Path(dep).parts
         if len(parts) > 3 and parts[0] == '.spago':
-            # check if '.spago/<package name>/v<version>/src/**/*.purs
             _, package_name, version_, *_ = parts
             version = [int(each)
                        for each in version_[1:].split('.')]  # type: List[int]
-        else:
-            continue
 
-        modules_requiring_ffi = []
-        for js_file in glob.glob(str(package_path.parent / "**.js"),
-                                 recursive=True):
-            js_path = Path(js_file)
-            if js_path.with_suffix(".purs").exists():
-                # e.g.,
-                #  from "ppt/.spago/console/v4.4.0\\src\\Effect\\Console.js"
-                #  to "Effect/Console"
-                module_parts = js_path.with_suffix("").parts[4:]
-                modules_requiring_ffi.append('.'.join(module_parts))
-        packages_requiring_ffi.append(
-            (package_name, version, modules_requiring_ffi))
-    return packages_requiring_ffi
+            # return a string, available at current machine
+            yield solve_github_repo(package_name, version)
 
 
 def build(run: bool = False, version: bool = False):
     """PureScript Python compiler"""
     path = Path().absolute()
-    _python_pack_name = path.name.replace('-', '_')
-    corefn_dir = path / "output"
     pure_py_conf = path / "pure-py.json"
-    if not pure_py_conf.exists():
-        pspy_hs_command = _pspy_hs_command
-        python_pack_name = _python_pack_name
-        foreign_path = path / "src"
-    else:
-        with pure_py_conf.open() as f:
-            conf = json.load(f)  # type: Dict[str, str]
-        pspy_hs_command = conf.get('haskell-codegen', _pspy_hs_command)
-        python_pack_name = conf.get('python-package', _python_pack_name)
-        foreign_path = conf.get('python-ffi', None)
-        if not foreign_path:
-            foreign_path = path / "src"
-        else:
-            foreign_path = Path(foreign_path)
+    py_pack_name_default = path.name.replace('-', '_')
 
+    # init conf
+    if pure_py_conf.exists():
+        with pure_py_conf.open() as f:
+            conf_dict = json.load(f)  # type: Dict[str, str]
+    else:
+        conf_dict = {}
+
+    conf_dict.setdefault(CKey.IndexMirror, CValue.IndexMirror)
+    conf_dict.setdefault(CKey.BluePrint, CValue.BluePrint)
+    conf_dict.setdefault(CKey.PyPack, py_pack_name_default)
+    conf_dict.setdefault(CKey.CoreFnDir, CValue.CoreFnDir)
+    conf_dict.setdefault(CKey.Spago, CValue.Spago)
+    conf_dict.setdefault(CKey.EntryModule, CValue.EntryModule)
+    conf_dict.setdefault(CKey.PyCurFFI, CValue.PyCurFFI)
+
+    conf = CValue()
+    conf.IndexMirror = conf_dict[CKey.IndexMirror]
+    conf.BluePrint = conf_dict[CKey.BluePrint]
+    conf.PyPack = conf_dict[CKey.PyPack]
+    conf.CoreFnDir = conf_dict[CKey.CoreFnDir]
+    conf.Spago = conf_dict[CKey.Spago]
+    conf.EntryModule = conf_dict[CKey.EntryModule]
+    conf.PyCurFFI = conf_dict[CKey.PyCurFFI]
+
+    # TODO: currently unused.
+    #   support custom corefn output path in pspy-blueprint.
+    corefn_dir = path / conf.CoreFnDir
+
+    # run commands
     if run:
         sys.path.append(str(path))
-        import_module('{}.Main.purescript_impl'.format(python_pack_name))
+        import_module('{}.Main.pure'.format(conf.PyPack))
         return
     elif version:
         from purescripto.version import __version__
         print('{}'.format(__version__))
         return
-    python_pack_path = path / python_pack_name
 
-    str_of_python_pack_path = str(python_pack_path)
-    str_of_foreign_path = str(foreign_path)
-    corefn_files = glob.glob(str(corefn_dir / "**" / "corefn.json"))
-    for each in corefn_files:
-        check_call([
-            pspy_hs_command, '--foreign-top', str_of_foreign_path, '--out-top',
-            str_of_python_pack_path, '--corefn', each
-        ])
+    pspy_local_path = Path(PY_PSC_LOCAL_PATH)
+
+    if not pspy_local_path.exists():
+        pspy_local_path.mkdir(parents=True)
+
+    ffi_deps_file = pspy_local_path / FFI_DEPS_FILENAME
+    cmd = mk_ps_blueprint_cmd(conf.BluePrint, conf.PyPack, conf.EntryModule,
+                              str(ffi_deps_file))
+    check_call(cmd)
+
+    path_join = os.path.join
+    python_ffi_path = Path(conf.PyPack) / "ffi"
+    if not python_ffi_path.exists():
+        python_ffi_path.mkdir(parents=True)
+    python_ffi_path = str(python_ffi_path)
+
+    # copy python ffi files
+    for repo_path in solve_ffi(conf):
+        copy_tree(path_join(repo_path, 'python'), python_ffi_path)
+
+    # fill __init__.py
+    for dir, _, files in os.walk(conf.PyPack):
+        if '__init__.py' not in files:
+            open(path_join(dir, '__init__.py'), 'w').close()
