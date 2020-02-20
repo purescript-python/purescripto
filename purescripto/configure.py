@@ -22,6 +22,16 @@ from purescripto.configure_consts import *
 import json
 import sys
 import os
+import re
+
+_TEMPLATE = {
+    CKey.CoreFnDir: CValue.CoreFnDir,
+    CKey.EntryModule: CValue.EntryModule,
+    CKey.PyPack: CValue.PyPack,
+    CKey.BluePrint: CValue.BluePrint,
+    CKey.Spago: CValue.Spago,
+    CKey.IndexMirror: CValue.IndexMirror
+}
 
 
 def mk_ps_blueprint_cmd(pspy_blueprint, python_pack_name: str, entry: str,
@@ -71,11 +81,30 @@ def solve_ffi(conf: CValue) -> Iterable[str]:
             yield solve_github_repo(package_name, version)
 
 
-def build(run: bool = False, version: bool = False):
+def build(run: bool = False, version: bool = False, init=False):
     """PureScript Python compiler"""
     path = Path().absolute()
     pure_py_conf = path / "pure-py.json"
     py_pack_name_default = path.name.replace('-', '_')
+    if init:
+        if not pure_py_conf.exists():
+            with pure_py_conf.open('w') as f:
+                json.dump(_TEMPLATE, f, indent=2, sort_keys=True)
+            with (path / '.gitignore').open('a+') as f:
+                is_configured = {'.pure-py/': False, '.pure-py.json': False}
+                for each in f.readlines():
+                    if each in ('.pure-py/', '.pure-py.json'):
+                        is_configured[each] = True
+
+                xs = [k for k, v in is_configured.items() if v]
+                if xs:
+                    xs.reverse()
+                    xs.append('# purescript-python')
+                    xs.reverse()
+                    f.writelines(xs)
+            local_dir = (path / PY_PSC_LOCAL_PATH)
+            local_dir.mkdir(parents=True, exist_ok=True)
+        return
 
     # init conf
     if pure_py_conf.exists():
