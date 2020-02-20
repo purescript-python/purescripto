@@ -1,3 +1,6 @@
+from pathlib import Path
+
+
 class CKey:
     IndexMirror = 'index-mirror'
     Spago = 'spago'
@@ -16,9 +19,12 @@ class CValue:
     EntryModule = 'Main'
 
 
-PSPY_BLUEPRINT_CMD = "pspy-blueprint"
-FFI_LOCAL_MODULE_PATH = "ffi"
-PY_PSC_LOCAL_PATH = '.py-pure'
-FFI_DEPS_FILENAME = 'ffi-deps'
+STR_PSPY_BLUEPRINT_CMD = "pspy-blueprint"
+STR_PY_PSC_LOCAL_PATH = '.py-pure'
+STR_FFI_DEPS_FILENAME = 'ffi-deps'
 
-PSPY_HOME = "~/.pspy"
+PSPY_HOME = Path("~/.pspy").expanduser()
+FFI_LOCAL_MODULE_PATH = PSPY_HOME / "ffi"
+
+if not PSPY_HOME.exists():
+    PSPY_HOME.mkdir(parents=True)

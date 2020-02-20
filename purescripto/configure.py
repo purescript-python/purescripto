@@ -12,7 +12,6 @@ You'd better add following paths to .gitignore :
 - .pure-py.json
 - .pure-py/
 """
-from pathlib import Path
 from importlib import import_module
 from typing import Dict, List, Iterable
 from subprocess import check_call
@@ -22,7 +21,6 @@ from purescripto.configure_consts import *
 import json
 import sys
 import os
-import re
 
 _TEMPLATE = {
     CKey.CoreFnDir: CValue.CoreFnDir,
@@ -56,8 +54,7 @@ def import_from_path(name, path):
 
 def solve_ffi(conf: CValue) -> Iterable[str]:
     mirror_name = conf.IndexMirror
-    pspy_home = Path(PSPY_HOME).expanduser()
-    mirror_entry = pspy_home / "mirrors" / mirror_name / "entry.py"
+    mirror_entry = PSPY_HOME / "mirrors" / mirror_name / "entry.py"
     if not mirror_entry.exists():
         raise IOError("Mirror {} not found in {}".format(
             mirror_name, mirror_entry.parent))
@@ -65,8 +62,8 @@ def solve_ffi(conf: CValue) -> Iterable[str]:
     mirror_mod = import_from_path(mirror_name, str(mirror_entry))
     solve_github_repo = mirror_mod.solve
 
-    pspy_local_path = Path(PY_PSC_LOCAL_PATH)
-    ffi_deps = pspy_local_path / FFI_DEPS_FILENAME
+    pspy_local_path = Path(STR_PY_PSC_LOCAL_PATH)
+    ffi_deps = pspy_local_path / STR_FFI_DEPS_FILENAME
     with ffi_deps.open() as f:
         deps = f.read().splitlines()
 
@@ -102,8 +99,9 @@ def build(run: bool = False, version: bool = False, init: bool = False):
                     xs.append('# purescript-python')
                     xs.reverse()
                     f.writelines(xs)
-            local_dir = (path / PY_PSC_LOCAL_PATH)
+            local_dir = (path / STR_PY_PSC_LOCAL_PATH)
             local_dir.mkdir(parents=True, exist_ok=True)
+            (local_dir / STR_FFI_DEPS_FILENAME).open('w').close()
         return
 
     # init conf
@@ -142,12 +140,12 @@ def build(run: bool = False, version: bool = False, init: bool = False):
         print('{}'.format(__version__))
         return
 
-    pspy_local_path = Path(PY_PSC_LOCAL_PATH)
+    pspy_local_path = Path(STR_PY_PSC_LOCAL_PATH)
 
     if not pspy_local_path.exists():
         pspy_local_path.mkdir(parents=True)
 
-    ffi_deps_file = pspy_local_path / FFI_DEPS_FILENAME
+    ffi_deps_file = pspy_local_path / STR_FFI_DEPS_FILENAME
     cmd = mk_ps_blueprint_cmd(conf.BluePrint, conf.PyPack, conf.EntryModule,
                               str(ffi_deps_file))
     check_call(cmd)
