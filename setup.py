@@ -23,7 +23,11 @@ setup(
     # above option specifies what commands to install,
     # e.g: entry_points={"console_scripts": ["yapypy=yapypy.cmd:compiler"]}
     install_requires=[
-        'painless-import-extension', 'pysexpr', 'wisepy2', 'gitpython'
+        'painless-import-extension',
+        'pysexpr',
+        'wisepy2',
+        'gitpython',
+        'diskcache'
     ],  # dependencies
     platforms="any",
     classifiers=[
