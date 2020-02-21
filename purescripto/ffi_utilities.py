@@ -4,7 +4,7 @@ from distutils.dir_util import remove_tree
 from urllib.parse import urlsplit
 
 
-def auto_link_repo(git_url: str, update=False) -> git.Repo:
+def auto_link_repo(git_url: str, update: bool) -> git.Repo:
     # Got a case insensitive name which can be used as
     # path in all platform, and has a bidirectional mapping
     # between the original url.

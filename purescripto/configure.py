@@ -18,9 +18,11 @@ from subprocess import check_call
 from importlib.util import spec_from_file_location, module_from_spec
 from distutils.dir_util import copy_tree
 from purescripto.configure_consts import *
+from purescripto.ffi_utilities import auto_link_repo
 import json
 import sys
 import os
+import git
 
 _TEMPLATE = {
     CKey.CoreFnDir: CValue.CoreFnDir,
@@ -59,7 +61,7 @@ def solve_ffi(conf: CValue) -> Iterable[str]:
             mirror_name, mirror_entry.parent))
 
     mirror_mod = import_from_path(mirror_name, str(mirror_entry))
-    solve_github_repo = mirror_mod.solve
+    solve_github_repo_url = mirror_mod.solve
 
     pspy_local_path = Path(STR_PY_PSC_LOCAL_PATH)
     ffi_deps = pspy_local_path / STR_FFI_DEPS_FILENAME
@@ -74,10 +76,10 @@ def solve_ffi(conf: CValue) -> Iterable[str]:
                        for each in version_[1:].split('.')]  # type: List[int]
 
             # return a string, available at current machine
-            yield solve_github_repo(package_name, version)
+            yield solve_github_repo_url(package_name, version)
 
 
-def build(run: bool = False, version: bool = False, init: bool = False):
+def build(run: bool = False, version: bool = False, init: bool = False, update: bool = False):
     """PureScript Python compiler"""
     path = Path().absolute()
     pure_py_conf = path / "pure-py.json"
@@ -159,8 +161,9 @@ def build(run: bool = False, version: bool = False, init: bool = False):
     python_ffi_path = str(python_ffi_path)
 
     # copy python ffi files
-    for repo_path in solve_ffi(conf):
-        copy_tree(path_join(repo_path, 'python-ffi'), python_ffi_path)
+    for repo_url in solve_ffi(conf):
+        repo = auto_link_repo(repo_url, update=update)
+        copy_tree(path_join(repo.working_dir, 'python-ffi'), python_ffi_path)
 
     python_ffi_provided_by_current_proj = path / "python-ffi"
     if python_ffi_provided_by_current_proj.exists():
