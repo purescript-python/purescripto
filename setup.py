@@ -1,8 +1,7 @@
 from setuptools import setup, find_packages
-from datetime import datetime
 from pathlib import Path
 
-version = 0.3
+version = 0.4
 with Path('README.md').open() as readme:
     readme = readme.read()
 
