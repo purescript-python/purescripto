@@ -137,7 +137,9 @@ def build(run: bool = False, version: bool = False, init: bool = False, update: 
     # run commands
     if run:
         sys.path.append(str(path))
-        import_module('{}.{}.pure'.format(conf.PyPack, conf.EntryModule))
+        mod = import_module('{}.{}.pure'.format(conf.PyPack, conf.EntryModule))
+        if hasattr(mod, 'main'):
+            mod.main()
         return
     elif version:
         from purescripto.version import __version__
