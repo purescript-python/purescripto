@@ -2,32 +2,26 @@ from setuptools import setup
 from pathlib import Path
 import sys
 import os
+import re
 
-version = 0.4
+version = "0.5.1"
 with Path('README.md').open() as readme:
     readme = readme.read()
 
-# class BinaryDistribution(Distribution):
-#     """https://stackoverflow.com/questions/35112511/pip-setup-py-bdist-wheel-no-longer-builds-forced-non-pure-wheels"""
-#     def has_ext_modules(_):
-#         return True
-#
-#     def is_pure(_):
-#         return False
-#
+valid_os_pat = re.compile("win64|linux64|macosx_\d+_\d+")
 
 
 def select_os(plat: str):
     plat = plat.lower()
-    assert plat in ('win64', 'linux64',
-                    'macos'), OSError("Not supported platform {}".format(plat))
+    assert valid_os_pat.match(plat), OSError(
+        "Not supported platform {}".format(plat))
     return plat
 
 
 platform_tags = {
-    'linux64': 'linux_x86_64',
+    'linux64': 'manylinux1_x86_64',
     'win64': 'win-amd64',
-    'macos': 'macosx'
+    'macosx_10_15': 'macosx_10_15_x86_64'
 }
 
 PLAT = os.environ['PLAT']

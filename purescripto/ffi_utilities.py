@@ -16,8 +16,11 @@ def auto_link_repo(git_url: str, update: bool) -> git.Repo:
     repo_path = dir.joinpath(spt.path[1:])
 
     if not repo_path.exists():
+        print('Initializing repo {} to local storage..'.format(git_url))
         repo = git.Repo.clone_from(git_url, str(repo_path))
     elif not (repo_path / ".git").exists():
+        print('Git repo {}\'s local storage missed .git, fixing..'.format(
+            git_url, repo_path))
         remove_tree(str(repo_path))
         repo = git.Repo.clone_from(git_url, str(repo_path))
     else:
@@ -25,6 +28,8 @@ def auto_link_repo(git_url: str, update: bool) -> git.Repo:
 
     if update:
         # noinspection PyUnboundLocalVariable
+        print('Updateing {}..'.format(repo))
         repo.git.pull('origin')
+        print('Git repo updated!')
 
     return repo
