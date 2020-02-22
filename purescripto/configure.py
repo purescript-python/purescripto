@@ -22,7 +22,6 @@ from purescripto.ffi_utilities import auto_link_repo
 import json
 import sys
 import os
-import git
 
 _TEMPLATE = {
     CKey.CoreFnDir: CValue.CoreFnDir,
@@ -79,7 +78,10 @@ def solve_ffi(conf: CValue) -> Iterable[str]:
             yield solve_github_repo_url(package_name, version)
 
 
-def build(run: bool = False, version: bool = False, init: bool = False, update: bool = False):
+def build(run: bool = False,
+          version: bool = False,
+          init: bool = False,
+          update: bool = False):
     """PureScript Python compiler"""
     path = Path().absolute()
     pure_py_conf = path / "pure-py.json"

@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+pspyblueprint/win64/pspy-*
+pspyblueprint/linux64/pspy-*
+pspyblueprint/macos/pspy-*
+
 # C extensions
 *.so
 
