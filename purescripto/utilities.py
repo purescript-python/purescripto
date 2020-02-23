@@ -2,6 +2,14 @@ import git
 from purescripto.configure_consts import *
 from distutils.dir_util import remove_tree
 from urllib.parse import urlsplit
+from importlib.util import spec_from_file_location, module_from_spec
+
+
+def import_from_path(name, path):
+    spec = spec_from_file_location(name, path)
+    mod = module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 def auto_link_repo(git_url: str, update: bool) -> git.Repo:

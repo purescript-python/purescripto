@@ -5,6 +5,7 @@ from pie import LoaderForBetterLife
 from importlib.util import spec_from_file_location, module_from_spec
 from importlib import import_module
 from purescripto import rts
+from purescripto.utilities import import_from_path
 import marshal
 
 RES = 'res'
@@ -12,7 +13,10 @@ RES = 'res'
 
 
 def _import_module_to_dict(m: str):
-    return import_module(m).__dict__
+    package, _, module = m.rpartition('.')
+    entry_path = import_module(package).__file__
+    loc = entry_path[-len('__init__.py'):] + module + '.py'
+    return import_from_path(m, loc).__dict__
 
 
 RTS_TEMPLATE = {

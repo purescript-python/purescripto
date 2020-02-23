@@ -15,10 +15,9 @@ You'd better add following paths to .gitignore :
 from importlib import import_module
 from typing import Dict, List, Iterable
 from subprocess import check_call
-from importlib.util import spec_from_file_location, module_from_spec
 from distutils.dir_util import copy_tree
 from purescripto.configure_consts import *
-from purescripto.ffi_utilities import auto_link_repo
+from purescripto.utilities import auto_link_repo
 import json
 import sys
 import os
@@ -43,14 +42,6 @@ def mk_ps_blueprint_cmd(pspy_blueprint, python_pack_name: str, entry: str,
         '--out-ffi-dep',
         ffi_deps_path,
     ]
-
-
-def import_from_path(name, path):
-    spec = spec_from_file_location(name, path)
-    mod = module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
 
 def solve_ffi(conf: CValue) -> Iterable[str]:
     mirror_name = conf.IndexMirror
