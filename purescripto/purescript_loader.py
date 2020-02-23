@@ -5,7 +5,7 @@ from pie import LoaderForBetterLife
 from importlib import import_module
 from purescripto import rts
 from purescripto.utilities import import_from_path
-from purescripto.workaround import suppress_cpy38_literal_is
+from purescripto.workaround import suppress_cpy38_literal_is, workaround
 import marshal
 import functools
 
@@ -31,7 +31,9 @@ RTS_TEMPLATE = {
 
 class LoadPureScriptImplCode(LoaderForBetterLife[CodeType]):
     def source_to_prog(self, src: bytes, path: Path) -> CodeType:
-        mod = import_from_path(self.qualified_name + '$', str(path.absolute()))
+        with workaround():
+            mod = import_from_path(self.qualified_name + '$',
+                                   str(path.absolute()))
         return getattr(mod, RES)
 
     def load_program(self, b: bytes) -> CodeType:
