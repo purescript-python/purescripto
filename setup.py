@@ -25,10 +25,9 @@ platform_tags = {
 }
 
 PLAT = os.environ['PLAT']
-CPY = os.environ['CPY']
 platform_tag = platform_tags[PLAT]
 
-sys.argv.extend(['--python-tag', 'cp' + CPY, '--plat-name', platform_tag])
+sys.argv.extend(['--plat-name', platform_tag])
 plat_dir = select_os(PLAT)
 
 executables = [

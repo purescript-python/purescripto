@@ -15,7 +15,7 @@ RES = 'res'
 def _import_module_to_dict(m: str):
     package, _, module = m.rpartition('.')
     entry_path = import_module(package).__file__
-    loc = entry_path[-len('__init__.py'):] + module + '.py'
+    loc = entry_path[:-len('__init__.py')] + module + '.py'
     return import_from_path(m, loc).__dict__
 
 
@@ -28,10 +28,7 @@ RTS_TEMPLATE = {
 
 class LoadPureScriptImplCode(LoaderForBetterLife[CodeType]):
     def source_to_prog(self, src: bytes, path: Path) -> CodeType:
-        spec = spec_from_file_location(self.qualified_name + '$',
-                                       str(path.absolute()))
-        mod = module_from_spec(spec)
-        spec.loader.exec_module(mod)
+        mod = import_from_path(self.qualified_name + '$', str(path.absolute()))
         return getattr(mod, RES)
 
     def load_program(self, b: bytes) -> CodeType:

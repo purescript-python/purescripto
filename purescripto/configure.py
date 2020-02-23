@@ -17,7 +17,7 @@ from typing import Dict, List, Iterable
 from subprocess import check_call
 from distutils.dir_util import copy_tree
 from purescripto.configure_consts import *
-from purescripto.utilities import auto_link_repo
+from purescripto.utilities import auto_link_repo, import_from_path
 import json
 import sys
 import os
@@ -42,6 +42,7 @@ def mk_ps_blueprint_cmd(pspy_blueprint, python_pack_name: str, entry: str,
         '--out-ffi-dep',
         ffi_deps_path,
     ]
+
 
 def solve_ffi(conf: CValue) -> Iterable[str]:
     mirror_name = conf.IndexMirror
