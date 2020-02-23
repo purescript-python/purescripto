@@ -8,7 +8,9 @@ __define_to_wrap = terms.define
 
 def define(name, args, body):
     r"https://github.com/purescript-python/purescript-python/issues/10"
-    return __define_to_wrap(name, args, body, [None] * len(args))
+    defaults = [None] if len(args) == 1 else [
+    ]  # for invoking thunk conveniently
+    return __define_to_wrap(name, args, body, defaults)
 
 
 def metadata(line, col, filename, sexpr):

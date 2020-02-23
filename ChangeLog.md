@@ -13,3 +13,9 @@
     References:
     - https://github.com/purescript-python/purescript-python/issues/8
  
+ 
+ 3. Workaround for compating JavaScript incomplete arguments.
+    
+    References:
+    - https://github.com/purescript-python/purescript-python/issues/10
+    
