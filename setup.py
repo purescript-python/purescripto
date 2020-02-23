@@ -4,7 +4,7 @@ import sys
 import os
 import re
 
-version = "0.5.1"
+version = "0.6.1"
 with Path('README.md').open() as readme:
     readme = readme.read()
 

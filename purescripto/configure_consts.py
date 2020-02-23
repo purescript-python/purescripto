@@ -3,7 +3,6 @@ from pathlib import Path
 
 class CKey:
     IndexMirror = 'index-mirror'
-    Spago = 'spago'
     BluePrint = 'pspy-blueprint'
     PyPack = 'python-package'
     CoreFnDir = 'corefn-dir'
@@ -12,7 +11,6 @@ class CKey:
 
 class CValue:
     IndexMirror = 'default'
-    Spago = 'spago'
     BluePrint = 'pspy-blueprint'
     PyPack = "python"
     CoreFnDir = 'output'

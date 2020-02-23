@@ -26,7 +26,6 @@ _TEMPLATE = {
     CKey.CoreFnDir: CValue.CoreFnDir,
     CKey.EntryModule: CValue.EntryModule,
     CKey.BluePrint: CValue.BluePrint,
-    CKey.Spago: CValue.Spago,
     CKey.IndexMirror: CValue.IndexMirror
 }
 
@@ -59,10 +58,19 @@ def solve_ffi(conf: CValue) -> Iterable[str]:
     with ffi_deps.open() as f:
         deps = f.read().splitlines()
 
+    cache = set()  # to avoid returning duplicated repo
+
     for dep in deps:
         parts = Path(dep).parts
         if len(parts) > 3 and parts[0] == '.spago':
             _, package_name, version_, *_ = parts
+
+            # assure unique
+            cache_key = (package_name, version_)
+            if cache_key in cache:
+                continue
+            cache.add(cache_key)
+
             version = [int(each)
                        for each in version_[1:].split('.')]  # type: List[int]
 
@@ -113,7 +121,6 @@ def build(run: bool = False,
     conf_dict.setdefault(CKey.BluePrint, CValue.BluePrint)
     conf_dict.setdefault(CKey.PyPack, py_pack_name_default)
     conf_dict.setdefault(CKey.CoreFnDir, CValue.CoreFnDir)
-    conf_dict.setdefault(CKey.Spago, CValue.Spago)
     conf_dict.setdefault(CKey.EntryModule, CValue.EntryModule)
 
     conf = CValue()
@@ -121,7 +128,6 @@ def build(run: bool = False,
     conf.BluePrint = conf_dict[CKey.BluePrint]
     conf.PyPack = conf_dict[CKey.PyPack]
     conf.CoreFnDir = conf_dict[CKey.CoreFnDir]
-    conf.Spago = conf_dict[CKey.Spago]
     conf.EntryModule = conf_dict[CKey.EntryModule]
 
     # TODO: currently unused.

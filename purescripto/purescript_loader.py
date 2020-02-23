@@ -2,21 +2,24 @@ from pathlib import Path
 from typing import Union, Tuple
 from types import CodeType
 from pie import LoaderForBetterLife
-from importlib.util import spec_from_file_location, module_from_spec
 from importlib import import_module
 from purescripto import rts
 from purescripto.utilities import import_from_path
+from purescripto.workaround import suppress_cpy38_literal_is
 import marshal
+import functools
 
 RES = 'res'
 """generated code object is stored in global variable $RES"""
 
 
+@functools.lru_cache()
 def _import_module_to_dict(m: str):
-    package, _, module = m.rpartition('.')
-    entry_path = import_module(package).__file__
-    loc = entry_path[:-len('__init__.py')] + module + '.py'
-    return import_from_path(m, loc).__dict__
+    with suppress_cpy38_literal_is():
+        package, _, module = m.rpartition('.')
+        entry_path = import_module(package).__file__
+        loc = entry_path[:-len('__init__.py')] + module + '.py'
+        return import_from_path(m, loc).__dict__
 
 
 RTS_TEMPLATE = {
