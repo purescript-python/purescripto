@@ -1,6 +1,6 @@
-from purescripto.configure import build
+from purescripto.configure import pspy
 
 
 def main():
     import wisepy2
-    wisepy2.wise(build)()
+    wisepy2.wise(pspy)()
