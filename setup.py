@@ -1,7 +1,7 @@
 from setuptools import setup
 from pathlib import Path
 
-version = "0.7.3"
+version = "0.7.4"
 with Path('README.md').open() as readme:
     readme = readme.read()
 
@@ -24,8 +24,8 @@ setup(
     # e.g: entry_points={"console_scripts": ["yapypy=yapypy.cmd:compiler"]}
     install_requires=[
         'painless-import-extension',
-        'pysexpr',
-        'wisepy2',
+        'pysexpr>=0.4',
+        'wisepy2>=1.1.1',
         'gitpython',
     ],  # dependencies
     platforms="any",
