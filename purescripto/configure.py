@@ -9,7 +9,7 @@ The configuration file .pure-py.json has following keys, whose values are all st
 - corefn-dir: the name of corefn directory, default to be "output"
 
 You'd better add following paths to .gitignore :
-- .pure-py.json
+- pure-py.json
 - .pure-py/
 """
 from importlib import import_module
@@ -161,7 +161,13 @@ def build(run: bool = False,
     ffi_deps_file = pspy_local_path / STR_FFI_DEPS_FILENAME
     cmd = mk_ps_blueprint_cmd(conf.BluePrint, conf.PyPack, conf.EntryModule,
                               str(ffi_deps_file))
-    check_call(cmd)
+    try:
+        check_call(cmd)
+    except FileNotFoundError:
+        print(
+            "It seems that your pspy-blueprint command hasn't got installed\n"
+            r"Go to this page: https://github.com/purescript-python/purescript-python/releases,\n"
+            r"download exe for your platform, and add it to your PATH.")
 
     path_join = os.path.join
     python_ffi_path = Path(conf.PyPack) / "ffi"
