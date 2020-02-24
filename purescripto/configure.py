@@ -168,6 +168,7 @@ def build(run: bool = False,
             "It seems that your pspy-blueprint command hasn't got installed\n"
             r"Go to this page: https://github.com/purescript-python/purescript-python/releases,\n"
             r"download exe for your platform, and add it to your PATH.")
+        sys.exit(1)
 
     path_join = os.path.join
     python_ffi_path = Path(conf.PyPack) / "ffi"
