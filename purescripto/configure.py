@@ -21,6 +21,7 @@ from purescripto.utilities import auto_link_repo, import_from_path
 import json
 import sys
 import os
+import wisepy2
 
 _TEMPLATE = {
     CKey.CoreFnDir: CValue.CoreFnDir,
@@ -29,6 +30,9 @@ _TEMPLATE = {
     CKey.IndexMirror: CValue.IndexMirror
 }
 
+
+def warn(s: str):
+    print(wisepy2.Yellow(s))
 
 def mk_ps_blueprint_cmd(pspy_blueprint, python_pack_name: str, entry: str,
                         ffi_deps_path: str):
@@ -49,13 +53,32 @@ def solve_ffi(conf: CValue, update_mirror: bool) -> Iterable[str]:
 
     if update_mirror:
         import git
+        if not mirror_repo.exists():
+            warn("The mirror {} not found at {}".format(mirror_name, str(mirror_repo)))
+            if mirror_name == 'default':
+                warn("We're going to clone the mirror"
+                     "https://github.com/purescript-python/purescript-python-ffi-index,\n"
+                     "to ~/.pspy/mirrors/default.")
+                git.Repo.clone_from(r"https://github.com/purescript-python/purescript-python-ffi-index", str(mirror_repo))
+            else:
+                raise IOError("Mirror not found")
         git.Repo(str(mirror_repo)).git.pull("origin")
 
     mirror_entry = mirror_repo / "entry.py"
 
     if not mirror_entry.exists():
-        raise IOError("Mirror {} not found in {}".format(
-            mirror_name, mirror_entry.parent))
+        if mirror_name != 'default':
+            raise IOError("Mirror {} not found in {}".format(
+                mirror_name, mirror_entry.parent))
+        else:
+            import git
+            warn("The mirror {} not found at {}".format(mirror_name, str(mirror_repo)))
+            if mirror_name == 'default':
+                warn("We're going to clone the mirror"
+                     "https://github.com/purescript-python/purescript-python-ffi-index,\n"
+                     "to ~/.pspy/mirrors/default.")
+                git.Repo.clone_from(r"https://github.com/purescript-python/purescript-python-ffi-index",
+                                    str(mirror_repo))
 
     mirror_mod = import_from_path(mirror_name, str(mirror_entry))
     solve_github_repo_url = mirror_mod.solve
@@ -85,10 +108,10 @@ def solve_ffi(conf: CValue, update_mirror: bool) -> Iterable[str]:
             yield solve_github_repo_url(package_name, version)
 
 
-def build(run: bool = False,
-          version: bool = False,
-          init: bool = False,
-          update: bool = False):
+def pspy(run: bool = False,
+         version: bool = False,
+         init: bool = False,
+         update: bool = False):
     """PureScript Python compiler"""
     path = Path().absolute()
     pure_py_conf = path / "pure-py.json"
