@@ -1,6 +1,6 @@
 ## v0.6
 
-### 2/23/2020
+### v0.6.2(2/23/2020)
 
 1. Suppressing warning of using `is` for CPython 3.8+.
    
@@ -18,4 +18,7 @@
     
     References:
     - https://github.com/purescript-python/purescript-python/issues/10
-    
+   
+### v0.6.3(2/24/2020)
+
+1. `--update` will update currently used mirror

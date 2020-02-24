@@ -43,9 +43,16 @@ def mk_ps_blueprint_cmd(pspy_blueprint, python_pack_name: str, entry: str,
     ]
 
 
-def solve_ffi(conf: CValue) -> Iterable[str]:
+def solve_ffi(conf: CValue, update_mirror: bool) -> Iterable[str]:
     mirror_name = conf.IndexMirror
-    mirror_entry = PSPY_HOME / "mirrors" / mirror_name / "entry.py"
+    mirror_repo = PSPY_HOME / "mirrors" / mirror_name
+
+    if update_mirror:
+        import git
+        git.Repo(str(mirror_repo)).git.pull("origin")
+
+    mirror_entry = mirror_repo / "entry.py"
+
     if not mirror_entry.exists():
         raise IOError("Mirror {} not found in {}".format(
             mirror_name, mirror_entry.parent))
@@ -163,7 +170,7 @@ def build(run: bool = False,
     python_ffi_path = str(python_ffi_path)
 
     # copy python ffi files
-    for repo_url in solve_ffi(conf):
+    for repo_url in solve_ffi(conf, update_mirror=update):
         repo = auto_link_repo(repo_url, update=update)
         copy_tree(path_join(repo.working_dir, 'python-ffi'), python_ffi_path)
 
