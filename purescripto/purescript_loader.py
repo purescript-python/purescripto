@@ -6,35 +6,60 @@ from importlib import import_module
 from purescripto import rts
 from purescripto.utilities import import_from_path
 from purescripto.workaround import suppress_cpy38_literal_is, workaround
+from py_sexpr.stack_vm.emit import module_code
+from purescripto.topdown import load_topdown
 import marshal
 import functools
 
-RES = 'res'
+RES = "res"
 """generated code object is stored in global variable $RES"""
 
 
 @functools.lru_cache()
 def _import_module_to_dict(m: str):
     with suppress_cpy38_literal_is():
-        package, _, module = m.rpartition('.')
+        package, _, module = m.rpartition(".")
         entry_path = import_module(package).__file__
-        loc = entry_path[:-len('__init__.py')] + module + '.py'
+        loc = entry_path[: -len("__init__.py")] + module + ".py"
         return import_from_path(m, loc).__dict__
 
 
 RTS_TEMPLATE = {
-    'zfsr32': rts.zfsr32,
-    'Error': Exception,
-    'import_module': _import_module_to_dict
+    "zfsr32": rts.zfsr32,
+    "Error": Exception,
+    "import_module": _import_module_to_dict,
 }
+
+
+def _META_ENV():
+    with workaround():
+        import py_sexpr.terms as terms
+
+        def make_pair(a, b):
+            return a, b
+
+        env = {each: getattr(terms, each) for each in terms.__all__}
+        env[make_pair.__name__] = make_pair
+    return env
+
+
+META_ENV = _META_ENV()
 
 
 class LoadPureScriptImplCode(LoaderForBetterLife[CodeType]):
     def source_to_prog(self, src: bytes, path: Path) -> CodeType:
-        with workaround():
-            mod = import_from_path(self.qualified_name + '$',
-                                   str(path.absolute()))
-        return getattr(mod, RES)
+
+        filename = str(path.absolute())
+        if path.name.endswith(".raw.py"):
+            meta_code = compile(src, filename, "eval")
+            sexpr = eval(meta_code, META_ENV)
+            code = module_code(sexpr, name=self.qualified_name + "$", filename=filename)
+        else:
+            assert path.name.endswith(".zip.py")
+            with path.open(mode="utf8") as f:
+                code = load_topdown(f, META_ENV)
+
+        return code
 
     def load_program(self, b: bytes) -> CodeType:
         return marshal.loads(b)
@@ -43,7 +68,7 @@ class LoadPureScriptImplCode(LoaderForBetterLife[CodeType]):
         return marshal.dumps(prog)
 
     def suffix(self) -> Union[str, Tuple[str, ...]]:
-        return '.src.py'
+        return ".raw.py", ".zip.py"
 
 
 def LoadPureScript(file: str, name: str):
@@ -51,4 +76,4 @@ def LoadPureScript(file: str, name: str):
     code = loader.load()
     man_made_globals = RTS_TEMPLATE.copy()
     exec(code, man_made_globals)
-    return man_made_globals['exports']
+    return man_made_globals["exports"]
