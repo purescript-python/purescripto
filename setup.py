@@ -1,32 +1,32 @@
 from setuptools import setup
 from pathlib import Path
+from purescripto.version import __version__ as version
 
-version = "0.7.5"
-with Path('README.md').open() as readme:
+with Path("README.md").open() as readme:
     readme = readme.read()
 
 setup(
     # distclass=BinaryDistribution,
-    name='purescripto',
+    name="purescripto",
     version=version if isinstance(version, str) else str(version),
     keywords="",  # keywords of your project that separated by comma ","
     description="",  # a concise introduction of your project
     long_description=readme,
     long_description_content_type="text/markdown",
-    license='mit',
-    python_requires='>=3.5',
-    url='https://github.com/purescript-python/purescripto',
-    author='thautawarm',
-    author_email='twshere@outlook.com',
-    packages=['purescripto'],
-    entry_points={"console_scripts": ['pspy=purescripto.pspy:main']},
+    license="mit",
+    python_requires=">=3.5",
+    url="https://github.com/purescript-python/purescripto",
+    author="thautawarm",
+    author_email="twshere@outlook.com",
+    packages=["purescripto"],
+    entry_points={"console_scripts": ["pspy=purescripto.pspy:main"]},
     # above option specifies what commands to install,
     # e.g: entry_points={"console_scripts": ["yapypy=yapypy.cmd:compiler"]}
     install_requires=[
-        'painless-import-extension',
-        'pysexpr>=0.4',
-        'wisepy2>=1.1.1',
-        'gitpython',
+        "painless-import-extension",
+        "pysexpr>=0.4",
+        "wisepy2>=1.1.1",
+        "gitpython",
     ],  # dependencies
     platforms="any",
     classifiers=[
