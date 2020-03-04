@@ -50,7 +50,7 @@ def load_topdown(file_io: TextIO, env):
 
     # noinspection PyDefaultArgument
     def read_bool(
-        readline=readline, mapping={"true": True, "false": False}, append=push_object,
+        readline=readline, mapping={"t": True, "f": False}, append=push_object,
     ):
         return append(mapping[readline()[:-1]])
 

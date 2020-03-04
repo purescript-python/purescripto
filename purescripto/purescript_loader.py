@@ -9,6 +9,8 @@ from purescripto.workaround import suppress_cpy38_literal_is, workaround
 from py_sexpr.stack_vm.emit import module_code
 from purescripto.topdown import load_topdown
 import marshal
+import zipfile
+import io
 import functools
 
 RES = "res"
@@ -53,12 +55,13 @@ class LoadPureScriptImplCode(LoaderForBetterLife[CodeType]):
         if path.name.endswith(".raw.py"):
             meta_code = compile(src, filename, "eval")
             sexpr = eval(meta_code, META_ENV)
-            code = module_code(sexpr, name=self.qualified_name + "$", filename=filename)
         else:
             assert path.name.endswith(".zip.py")
-            with path.open(mode="utf8") as f:
-                code = load_topdown(f, META_ENV)
+            zip = zipfile.ZipFile(filename)
+            file = io.StringIO(zip.read('source').decode('utf8'))
+            sexpr = load_topdown(file, META_ENV)
 
+        code = module_code(sexpr, name=self.qualified_name + "$", filename=filename)
         return code
 
     def load_program(self, b: bytes) -> CodeType:
