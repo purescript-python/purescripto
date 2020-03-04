@@ -1,2 +1,2 @@
-__version__ = "0.1"
-__blueprint_version__ = '0.1.1'
+__version__ = "0.8.0"
+__blueprint_version__ = '0.1.2'

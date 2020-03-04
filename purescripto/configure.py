@@ -13,7 +13,7 @@ You'd better add following paths to .gitignore :
 - .pure-py/
 """
 from importlib import import_module
-from typing import Dict, List, Iterable
+from typing import Dict, List, Iterable, cast
 from subprocess import check_call
 from distutils.dir_util import copy_tree
 from purescripto.configure_consts import *
@@ -27,23 +27,32 @@ _TEMPLATE = {
     CKey.CoreFnDir: CValue.CoreFnDir,
     CKey.EntryModule: CValue.EntryModule,
     CKey.BluePrint: CValue.BluePrint,
-    CKey.IndexMirror: CValue.IndexMirror
+    CKey.IndexMirror: CValue.IndexMirror,
+    CKey.IsPrettyPrint: CValue.IsPrettyPrint,
 }
 
 
 def warn(s: str):
     print(wisepy2.Yellow(s))
 
-def mk_ps_blueprint_cmd(pspy_blueprint, python_pack_name: str, entry: str,
-                        ffi_deps_path: str):
+
+def mk_ps_blueprint_cmd(
+    pspy_blueprint,
+    python_pack_name: str,
+    entry: str,
+    ffi_deps_path: str,
+    is_pretty_print: bool,
+):
     return [
         pspy_blueprint,
-        '--out-python',
+        "--py-dir",
         python_pack_name,
-        '--corefn-entry',
+        "--entry-mod",
         entry,
-        '--out-ffi-dep',
+        "--ffi-dep",
         ffi_deps_path,
+        "--out-pretty",
+        str(is_pretty_print),
     ]
 
 
@@ -53,13 +62,19 @@ def solve_ffi(conf: CValue, update_mirror: bool) -> Iterable[str]:
 
     if update_mirror:
         import git
+
         if not mirror_repo.exists():
             warn("The mirror {} not found at {}".format(mirror_name, str(mirror_repo)))
-            if mirror_name == 'default':
-                warn("We're going to clone the mirror"
-                     "https://github.com/purescript-python/purescript-python-ffi-index,\n"
-                     "to ~/.pspy/mirrors/default.")
-                git.Repo.clone_from(r"https://github.com/purescript-python/purescript-python-ffi-index", str(mirror_repo))
+            if mirror_name == "default":
+                warn(
+                    "We're going to clone the mirror"
+                    "https://github.com/purescript-python/purescript-python-ffi-index,\n"
+                    "to ~/.pspy/mirrors/default."
+                )
+                git.Repo.clone_from(
+                    r"https://github.com/purescript-python/purescript-python-ffi-index",
+                    str(mirror_repo),
+                )
             else:
                 raise IOError("Mirror not found")
         git.Repo(str(mirror_repo)).git.pull("origin")
@@ -67,18 +82,24 @@ def solve_ffi(conf: CValue, update_mirror: bool) -> Iterable[str]:
     mirror_entry = mirror_repo / "entry.py"
 
     if not mirror_entry.exists():
-        if mirror_name != 'default':
-            raise IOError("Mirror {} not found in {}".format(
-                mirror_name, mirror_entry.parent))
+        if mirror_name != "default":
+            raise IOError(
+                "Mirror {} not found in {}".format(mirror_name, mirror_entry.parent)
+            )
         else:
             import git
+
             warn("The mirror {} not found at {}".format(mirror_name, str(mirror_repo)))
-            if mirror_name == 'default':
-                warn("We're going to clone the mirror"
-                     "https://github.com/purescript-python/purescript-python-ffi-index,\n"
-                     "to ~/.pspy/mirrors/default.")
-                git.Repo.clone_from(r"https://github.com/purescript-python/purescript-python-ffi-index",
-                                    str(mirror_repo))
+            if mirror_name == "default":
+                warn(
+                    "We're going to clone the mirror"
+                    "https://github.com/purescript-python/purescript-python-ffi-index,\n"
+                    "to ~/.pspy/mirrors/default."
+                )
+                git.Repo.clone_from(
+                    r"https://github.com/purescript-python/purescript-python-ffi-index",
+                    str(mirror_repo),
+                )
 
     mirror_mod = import_from_path(mirror_name, str(mirror_entry))
     solve_github_repo_url = mirror_mod.solve
@@ -92,7 +113,7 @@ def solve_ffi(conf: CValue, update_mirror: bool) -> Iterable[str]:
 
     for dep in deps:
         parts = Path(dep).parts
-        if len(parts) > 3 and parts[0] == '.spago':
+        if len(parts) > 3 and parts[0] == ".spago":
             _, package_name, version_, *_ = parts
 
             # assure unique
@@ -101,43 +122,41 @@ def solve_ffi(conf: CValue, update_mirror: bool) -> Iterable[str]:
                 continue
             cache.add(cache_key)
 
-            version = [int(each)
-                       for each in version_[1:].split('.')]  # type: List[int]
+            version = [int(each) for each in version_[1:].split(".")]  # type: List[int]
 
             # return a string, available at current machine
             yield solve_github_repo_url(package_name, version)
 
 
-def pspy(run: bool = False,
-         version: bool = False,
-         init: bool = False,
-         update: bool = False):
+def pspy(
+    run: bool = False, version: bool = False, init: bool = False, update: bool = False
+):
     """PureScript Python compiler"""
     path = Path().absolute()
     pure_py_conf = path / "pure-py.json"
-    py_pack_name_default = path.name.replace('-', '_')
+    py_pack_name_default = path.name.replace("-", "_")
     if init:
         if not pure_py_conf.exists():
-            with pure_py_conf.open('w') as f:
+            with pure_py_conf.open("w") as f:
                 json.dump(_TEMPLATE, f, indent=2, sort_keys=True)
 
             ignore_file = path / ".gitignore"
-            with ignore_file.open('a+') as f:
-                is_configured = {'.pure-py/': True, 'pure-py.json': True}
+            with ignore_file.open("a+") as f:
+                is_configured = {".pure-py/": True, "pure-py.json": True}
                 for each in f.readlines():
-                    if each in ('.pure-py/', 'pure-py.json'):
+                    if each in (".pure-py/", "pure-py.json"):
                         is_configured[each] = False
 
                 xs = [k for k, v in is_configured.items() if v]
                 if xs:
-                    f.write('\n# purescript-python\n')
+                    f.write("\n# purescript-python\n")
                     for x in xs:
                         f.write(x)
-                        f.write('\n')
+                        f.write("\n")
 
-            local_dir = (path / STR_PY_PSC_LOCAL_PATH)
+            local_dir = path / STR_PY_PSC_LOCAL_PATH
             local_dir.mkdir(parents=True, exist_ok=True)
-            (local_dir / STR_FFI_DEPS_FILENAME).open('w').close()
+            (local_dir / STR_FFI_DEPS_FILENAME).open("w").close()
         return
 
     # init conf
@@ -152,6 +171,7 @@ def pspy(run: bool = False,
     conf_dict.setdefault(CKey.PyPack, py_pack_name_default)
     conf_dict.setdefault(CKey.CoreFnDir, CValue.CoreFnDir)
     conf_dict.setdefault(CKey.EntryModule, CValue.EntryModule)
+    conf_dict.setdefault(CKey.IsPrettyPrint, CValue.IsPrettyPrint)
 
     conf = CValue()
     conf.IndexMirror = conf_dict[CKey.IndexMirror]
@@ -159,6 +179,7 @@ def pspy(run: bool = False,
     conf.PyPack = conf_dict[CKey.PyPack]
     conf.CoreFnDir = conf_dict[CKey.CoreFnDir]
     conf.EntryModule = conf_dict[CKey.EntryModule]
+    conf.IsPrettyPrint = cast(bool, conf_dict[CKey.IsPrettyPrint])
 
     # TODO: currently unused.
     #   support custom corefn output path in pspy-blueprint.
@@ -167,13 +188,14 @@ def pspy(run: bool = False,
     # run commands
     if run:
         sys.path.append(str(path))
-        mod = import_module('{}.{}.pure'.format(conf.PyPack, conf.EntryModule))
-        if hasattr(mod, 'main'):
+        mod = import_module("{}.{}.pure".format(conf.PyPack, conf.EntryModule))
+        if hasattr(mod, "main"):
             mod.main()
         return
     elif version:
         from purescripto.version import __version__
-        print('{}'.format(__version__))
+
+        print("{}".format(__version__))
         return
 
     pspy_local_path = Path(STR_PY_PSC_LOCAL_PATH)
@@ -182,8 +204,13 @@ def pspy(run: bool = False,
         pspy_local_path.mkdir(parents=True)
 
     ffi_deps_file = pspy_local_path / STR_FFI_DEPS_FILENAME
-    cmd = mk_ps_blueprint_cmd(conf.BluePrint, conf.PyPack, conf.EntryModule,
-                              str(ffi_deps_file))
+    cmd = mk_ps_blueprint_cmd(
+        conf.BluePrint,
+        conf.PyPack,
+        conf.EntryModule,
+        str(ffi_deps_file),
+        conf.IsPrettyPrint,
+    )
     try:
         check_call(cmd)
     except FileNotFoundError:
@@ -191,7 +218,8 @@ def pspy(run: bool = False,
             "It seems that your pspy-blueprint command hasn't got installed\n"
             r"Go to this page: https://github.com/purescript-python/purescript-python/releases,"
             "\n"
-            r"download exe for your platform, and add it to your PATH.")
+            r"download exe for your platform, and add it to your PATH."
+        )
         sys.exit(1)
 
     path_join = os.path.join
@@ -203,7 +231,7 @@ def pspy(run: bool = False,
     # copy python ffi files
     for repo_url in solve_ffi(conf, update_mirror=update):
         repo = auto_link_repo(repo_url, update=update)
-        copy_tree(path_join(repo.working_dir, 'python-ffi'), python_ffi_path)
+        copy_tree(path_join(repo.working_dir, "python-ffi"), python_ffi_path)
 
     python_ffi_provided_by_current_proj = path / "python-ffi"
     if python_ffi_provided_by_current_proj.exists():
@@ -211,5 +239,5 @@ def pspy(run: bool = False,
 
     # fill __init__.py
     for dir, _, files in os.walk(conf.PyPack):
-        if '__init__.py' not in files:
-            open(path_join(dir, '__init__.py'), 'w').close()
+        if "__init__.py" not in files:
+            open(path_join(dir, "__init__.py"), "w").close()

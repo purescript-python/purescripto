@@ -3,14 +3,6 @@ from py_sexpr import terms
 import warnings
 
 __metadata_to_wrap = terms.metadata
-__define_to_wrap = terms.define
-
-
-def define(name, args, body):
-    r"https://github.com/purescript-python/purescript-python/issues/10"
-    defaults = [None] if len(args) == 1 else [
-    ]  # for invoking thunk conveniently
-    return __define_to_wrap(name, args, body, defaults)
 
 
 def metadata(line, col, filename, sexpr):
@@ -27,20 +19,18 @@ def metadata(line, col, filename, sexpr):
 @contextmanager
 def workaround():
     """contextually invoke this when loading *.src.py"""
-    __metadata_to_wrap.__globals__['metadata'] = metadata
-    __define_to_wrap.__globals__['define'] = define
+    __metadata_to_wrap.__globals__["metadata"] = metadata
     try:
         yield
     finally:
-        __metadata_to_wrap.__globals__['metadata'] = __metadata_to_wrap
-        __define_to_wrap.__globals__['define'] = __define_to_wrap
+        __metadata_to_wrap.__globals__["metadata"] = __metadata_to_wrap
 
 
 @contextmanager
 def suppress_cpy38_literal_is():
     """https://github.com/purescript-python/purescript-python/issues/9"""
     with warnings.catch_warnings():
-        warnings.filterwarnings('ignore',
-                                category=SyntaxWarning,
-                                message='"is" with a literal')
+        warnings.filterwarnings(
+            "ignore", category=SyntaxWarning, message='"is" with a literal'
+        )
         yield
