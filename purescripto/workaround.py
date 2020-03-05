@@ -34,3 +34,5 @@ def suppress_cpy38_literal_is():
             "ignore", category=SyntaxWarning, message='"is" with a literal'
         )
         yield
+
+

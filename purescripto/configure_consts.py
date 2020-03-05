@@ -7,7 +7,7 @@ class CKey:
     PyPack = "python-package"
     CoreFnDir = "corefn-dir"
     EntryModule = "entry-module"
-    IsPrettyPrint = "pretty-print?"
+    DataFormat = "data-format"
 
 
 class CValue:
@@ -16,7 +16,7 @@ class CValue:
     PyPack = "python"
     CoreFnDir = "output"
     EntryModule = "Main"
-    IsPrettyPrint = False
+    DataFormat = "Compressed"
 
 
 STR_PSPY_BLUEPRINT_CMD = "pspy-blueprint"
