@@ -13,7 +13,7 @@ You'd better add following paths to .gitignore :
 - .pure-py/
 """
 from importlib import import_module
-from typing import Dict, List, Iterable, cast
+from typing import Dict, List, Iterable
 from subprocess import check_call
 from distutils.dir_util import copy_tree
 from purescripto.configure_consts import *
@@ -24,11 +24,11 @@ import os
 import wisepy2
 
 _TEMPLATE = {
-    CKey.CoreFnDir: CValue.CoreFnDir,
+    CKey.CoreFnDir  : CValue.CoreFnDir,
     CKey.EntryModule: CValue.EntryModule,
-    CKey.BluePrint: CValue.BluePrint,
+    CKey.BluePrint  : CValue.BluePrint,
     CKey.IndexMirror: CValue.IndexMirror,
-    CKey.IsPrettyPrint: CValue.IsPrettyPrint,
+    CKey.DataFormat : CValue.DataFormat,
 }
 
 
@@ -41,7 +41,7 @@ def mk_ps_blueprint_cmd(
     python_pack_name: str,
     entry: str,
     ffi_deps_path: str,
-    is_pretty_print: bool,
+    format: str,
 ):
     return [
         pspy_blueprint,
@@ -51,8 +51,8 @@ def mk_ps_blueprint_cmd(
         entry,
         "--ffi-dep",
         ffi_deps_path,
-        "--out-pretty",
-        str(is_pretty_print),
+        "--out-format",
+        format,
     ]
 
 
@@ -171,7 +171,7 @@ def pspy(
     conf_dict.setdefault(CKey.PyPack, py_pack_name_default)
     conf_dict.setdefault(CKey.CoreFnDir, CValue.CoreFnDir)
     conf_dict.setdefault(CKey.EntryModule, CValue.EntryModule)
-    conf_dict.setdefault(CKey.IsPrettyPrint, CValue.IsPrettyPrint)
+    conf_dict.setdefault(CKey.DataFormat, CValue.DataFormat)
 
     conf = CValue()
     conf.IndexMirror = conf_dict[CKey.IndexMirror]
@@ -179,7 +179,7 @@ def pspy(
     conf.PyPack = conf_dict[CKey.PyPack]
     conf.CoreFnDir = conf_dict[CKey.CoreFnDir]
     conf.EntryModule = conf_dict[CKey.EntryModule]
-    conf.IsPrettyPrint = cast(bool, conf_dict[CKey.IsPrettyPrint])
+    conf.DataFormat = conf_dict[CKey.DataFormat]
 
     # TODO: currently unused.
     #   support custom corefn output path in pspy-blueprint.
@@ -209,7 +209,7 @@ def pspy(
         conf.PyPack,
         conf.EntryModule,
         str(ffi_deps_file),
-        conf.IsPrettyPrint,
+        conf.DataFormat,
     )
     try:
         check_call(cmd)

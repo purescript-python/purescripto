@@ -17,6 +17,7 @@ META_ENV = _META_ENV()
 
 def load_topdown(file_io: TextIO, env):
     readline, read = file_io.readline, file_io.read
+
     n_entry = int(readline()[:-1])
     ACTION_ATTR = 0
     ACTION_APP = 1
@@ -87,7 +88,7 @@ def load_topdown(file_io: TextIO, env):
         "b": read_bool,
         "n": read_nil,
         "f": read_float,
-        "v": read_var,
+        "v": read_var
     }
     non_term_maps = {"a": read_acc, "c": read_cons, "l": read_seq}
 
