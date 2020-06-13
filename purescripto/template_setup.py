@@ -52,7 +52,7 @@ def exe():
     from subprocess import call
     import os
     import sys
-    exe_file = os.name == "nt" and "pspy-blueprint.exe" else "pspy-blueprint"
+    exe_file = os.name == "nt" and "pspy-blueprint.exe" or "pspy-blueprint"
     cmd = str((Path(__file__).parent / exe_file).absolute())
     call([cmd, *sys.argv[1:]])
 
