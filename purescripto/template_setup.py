@@ -50,8 +50,10 @@ def gen_init():
 def exe():
     from pathlib import Path
     from subprocess import call
+    import os
     import sys
-    cmd = str((Path(__file__).parent / "pspy-blueprint.exe").absolute())
+    exe_file = os.name == "nt" and "pspy-blueprint.exe" else "pspy-blueprint"
+    cmd = str((Path(__file__).parent / exe_file).absolute())
     call([cmd, *sys.argv[1:]])
 
 def check():

@@ -120,7 +120,9 @@ def get_binary(out_path):
 
     url = each['browser_download_url']
     zf = zipfile.ZipFile(io.BytesIO(requests.get(url).content))
-    exe = "pspy-blueprint.exe"
+    exe = "pspy-blueprint"
+    if 'win' in url:
+        exe += '.exe'
     out_path.mkdir(exist_ok=True, parents=True, mode=0o777)
     zf.extract(exe, path=str(out_path))
     make_executable(str(out_path / exe))
