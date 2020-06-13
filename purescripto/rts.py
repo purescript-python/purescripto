@@ -35,14 +35,14 @@ def _import_module_to_dict(m: str):
         return import_from_path(m, loc).__dict__
 
 
-def get_item_looper(depth, base, item):
+def getitem_looper(depth, base, item):
     while depth > 0:
         base = base[item]
         depth -= 1
     return base
 
 
-def get_attr_looper(depth, base, attr):
+def getattr_looper(depth, base, attr):
     # TODO: specializer here
     while depth > 0:
         base = get_attr(base, attr)
@@ -54,8 +54,8 @@ RTS_TEMPLATE = {
     "zfsr32": zfsr32,
     "Error": Exception,
     "import_module": _import_module_to_dict,
-    get_attr_looper.__name__: get_attr_looper,
-    get_item_looper.__name__: get_item_looper,
+    getattr_looper.__name__: getattr_looper,
+    getitem_looper.__name__: getitem_looper,
 }
 
 
