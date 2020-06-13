@@ -34,6 +34,7 @@ setup(
         "pysexpr>=0.5,<=0.6",
         "wisepy2>=1.1.1",
         "gitpython",
+        "requests"
     ],  # dependencies
     platforms="any",
     classifiers=[
