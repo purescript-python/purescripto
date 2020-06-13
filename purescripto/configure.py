@@ -128,10 +128,24 @@ def solve_ffi(conf: CValue, update_mirror: bool) -> Iterable[str]:
             yield solve_github_repo_url(package_name, version)
 
 
+FILES_TO_IGNORE = ['.pure-py/']
 def pspy(
     run: bool = False, version: bool = False, init: bool = False, update: bool = False
 ):
-    """PureScript Python compiler"""
+    """PureScript Python compiler
+    --run     : running without rebuild(note that `spago run` will rebuild the code)
+    --version : version of your purescript-python wrapper(purescripto)
+    --init    : setup purescript-python components for a spago project
+    --update  : sync with latest mirror and Python FFI dependencies
+
+example use:
+    Create a pspy project:
+        sh> mkdir purescript-xxx && cd purescript-xxx && spago init && pspy --init
+    Update project's dependencies:
+        sh> cd purescript-xxx && pspy --update
+    Build your project:
+        sh> pspy
+    """
     path = Path().absolute()
     pure_py_conf = path / "pure-py.json"
     py_pack_name_default = path.name.replace("-", "_")
@@ -142,9 +156,9 @@ def pspy(
 
             ignore_file = path / ".gitignore"
             with ignore_file.open("a+") as f:
-                is_configured = {".pure-py/": True, "pure-py.json": True}
+                is_configured = {k: True for k in FILES_TO_IGNORE}
                 for each in f.readlines():
-                    if each in (".pure-py/", "pure-py.json"):
+                    if each in FILES_TO_IGNORE:
                         is_configured[each] = False
 
                 xs = [k for k, v in is_configured.items() if v]
