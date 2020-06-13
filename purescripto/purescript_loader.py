@@ -16,8 +16,8 @@ class LoadPureScriptImplCode(LoaderForBetterLife[CodeType]):
         filename = str(path.absolute())
         if path.name.endswith(".raw.py"):
             expr = ast.Expression(ast.parse(src).body[0].value)
-            src_path, meta_code = compile(expr, filename, "eval")
-            sexpr = eval(meta_code, META_ENV)
+            meta_code = compile(expr, filename, "eval")
+            src_path, sexpr = eval(meta_code, META_ENV)
         else:
             assert path.name.endswith(".zip.py")
             zip = zipfile.ZipFile(filename)
