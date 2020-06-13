@@ -24,7 +24,7 @@ setup(
     # e.g: entry_points={"console_scripts": ["yapypy=yapypy.cmd:compiler"]}
     install_requires=[
         "painless-import-extension",
-        "pysexpr>=0.5,<0.6",
+        "pysexpr>=0.5,<=0.6",
         "wisepy2>=1.1.1",
         "gitpython",
     ],  # dependencies

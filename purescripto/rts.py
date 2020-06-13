@@ -22,12 +22,6 @@ def _META_ENV():
 
         env = {each: getattr(terms, each) for each in terms.__all__}
         env[make_pair.__name__] = make_pair
-        env[get_attr_looper.__name__] = lambda a, b, c: call(
-            "$" + get_attr_looper.__name__, a, b, c
-        )
-        env[get_item_looper.__name__] = lambda a, b, c: call(
-            "$" + get_item_looper.__name__, a, b, c
-        )
 
     return env
 
@@ -60,8 +54,8 @@ RTS_TEMPLATE = {
     "zfsr32": zfsr32,
     "Error": Exception,
     "import_module": _import_module_to_dict,
-    ("$" + get_attr_looper.__name__): get_attr_looper,
-    ("$" + get_item_looper.__name__): get_item_looper,
+    get_attr_looper.__name__: get_attr_looper,
+    get_item_looper.__name__: get_item_looper,
 }
 
 
