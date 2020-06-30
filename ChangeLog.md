@@ -1,3 +1,9 @@
+## v0.8
+
+### (Unreleased) v0.8.9(6/30/2020)
+1. Cache the import of a purescript module, in order to avoid its re-import during 
+   importing it for the first time.
+
 ## v0.6
 
 ### v0.6.2(2/23/2020)
