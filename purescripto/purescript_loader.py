@@ -10,7 +10,6 @@ import zipfile
 import ast
 import io
 
-
 class LoadPureScriptImplCode(LoaderForBetterLife[CodeType]):
     def source_to_prog(self, src: bytes, path: Path) -> CodeType:
         filename = str(path.absolute())
@@ -37,10 +36,22 @@ class LoadPureScriptImplCode(LoaderForBetterLife[CodeType]):
     def suffix(self) -> Union[str, Tuple[str, ...]]:
         return ".zip.py", ".raw.py"
 
-
+# to avoid the re-import of a module
+# during importing it for the first time.
+EXPORTS = {}
 def LoadPureScript(file: str, name: str):
+    cache_key = (file, name)
+    cache_exports = EXPORTS.get(cache_key)
+    if cache_exports:
+        return cache_exports
+    
     loader = LoadPureScriptImplCode(file, name)
     code = loader.load()
     man_made_globals = RTS_TEMPLATE.copy()
     exec(code, man_made_globals)
-    return man_made_globals["exports"]
+    cache_exports = man_made_globals["exports"]
+    if cache_key in EXPORTS:
+        raise Exception("Cross import file {} at {}.".format(file, name))
+    
+    EXPORTS[cache_key] = cache_exports
+    return cache_exports
